@@ -1,0 +1,30 @@
+* emacs-maple-minibuffer
+  Show minibuffer with another frame
+
+** screenshot
+   [[https://github.com/honmaple/emacs-maple-minibuffer/blob/master/screenshot/example.gif]]
+
+** How to use
+   #+begin_src bash
+   git clone https://github.com/honmaple/emacs-maple-minibuffer ~/.emacs.d/site-lisp/maple-minibuffer
+   #+end_src
+
+   #+begin_src elisp
+     (use-package maple-minibuffer
+       :ensure nil
+       :hook (after-init . maple-minibuffer-mode)
+       :config
+       (setq maple-minibuffer:position-type 'window-bottom-left
+             maple-minibuffer:height nil
+             maple-minibuffer:border-color "gray50"
+             maple-minibuffer:width 100)
+
+       ;; more custom parameters for frame
+       (defun maple-minibuffer:parameters ()
+         "Maple minibuffer parameters."
+         `((height . ,(or maple-minibuffer:height 10))
+           (width . ,(or maple-minibuffer:width (window-pixel-width)))
+           (left-fringe . 5)
+           (right-fringe . 5))))
+   #+end_src
+   
