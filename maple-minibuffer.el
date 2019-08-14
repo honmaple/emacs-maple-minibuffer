@@ -70,6 +70,12 @@
   :type 'list
   :group 'maple-minibuffer)
 
+(defcustom maple-minibuffer:ignore-action
+  '(evil-ex)
+  "Maple minibuffer ignore function."
+  :type 'list
+  :group 'maple-minibuffer)
+
 (defcustom maple-minibuffer:cache t
   "Whether use frame cache."
   :type 'boolean
@@ -102,6 +108,11 @@
          (delete-frame frame)))
      result))
 
+(defmacro maple-minibuffer:with-disable (&rest body)
+  "Run BODY with disabled maple-minibuffer-mode."
+  (declare (indent 0) (debug t))
+  `(let (maple-minibuffer-mode) ,@body))
+
 (defun maple-minibuffer:create-frame(&optional parent-frame)
   "Create maple minibuffer frame with PARENT-FRAME."
   (let ((frame (make-frame `(,@(maple-minibuffer:parameters)
@@ -112,6 +123,9 @@
                              (internal-border-width . 1)
                              (left-fringe . 0)
                              (right-fringe . 0)
+                             (skip-taskbar . t)
+                             (undecorated . t)
+                             (unsplittable . t)
                              (vertical-scroll-bars . nil)
                              (horizontal-scroll-bars . nil)))))
     (when maple-minibuffer:border-color
@@ -166,7 +180,12 @@
 
 (defun maple-minibuffer:read (oldfun &rest args)
   "Around minibuffer read OLDFUN with ARGS."
-  (maple-minibuffer:with (apply oldfun args)))
+  (if maple-minibuffer-mode (maple-minibuffer:with (apply oldfun args))
+    (apply oldfun args)))
+
+(defun maple-minibuffer:read-disable (oldfun &rest args)
+  "Around minibuffer read OLDFUN with ARGS."
+  (maple-minibuffer:with-disable (apply oldfun args)))
 
 ;; (defmacro maple-minibuffer:ivy-read-action (action)
 ;;   "Around minibuffer read ACTION."
@@ -180,24 +199,21 @@
 ;;       (plist-put args :action (maple-minibuffer:ivy-read-action action)))
 ;;     (maple-minibuffer:with (apply oldfun args))))
 
-;; (defun maple-minibuffer:evil-read (oldfun &rest args)
-;;   "Around minibuffer read OLDFUN with ARGS."
-;;   (let ((maple-minibuffer:height 1)
-;;         maple-minibuffer:frame maple-minibuffer:cache)
-;;     (maple-minibuffer:with (apply oldfun args))))
-
-
 (defun maple-minibuffer-mode-on()
   "Maple minibuffer mode on."
   (interactive)
   (dolist (func maple-minibuffer:action)
-    (advice-add func :around 'maple-minibuffer:read)))
+    (advice-add func :around 'maple-minibuffer:read))
+  (dolist (func maple-minibuffer:ignore-action)
+    (advice-add func :around 'maple-minibuffer:read-disable)))
 
 (defun maple-minibuffer-mode-off()
   "Maple minibuffer mode off."
   (interactive)
   (dolist (func maple-minibuffer:action)
     (advice-remove func 'maple-minibuffer:read))
+  (dolist (func maple-minibuffer:ignore-action)
+    (advice-remove func 'maple-minibuffer:read-disable))
   (setq maple-minibuffer:frame nil))
 
 ;; (setq maple-minibuffer:action '(read-from-minibuffer))
