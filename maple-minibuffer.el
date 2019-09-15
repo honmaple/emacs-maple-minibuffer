@@ -3,7 +3,7 @@
 ;; Copyright (C) 2015-2019 lin.jiang
 
 ;; Author: lin.jiang <mail@honmaple.com>
-;; URL: https://github.com/honmaple/dotfiles/tree/master/emacs.d
+;; URL: https://github.com/honmaple/emacs-maple-minibuffer
 
 ;; This file is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
