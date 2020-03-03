@@ -71,7 +71,7 @@
   :group 'maple-minibuffer)
 
 (defcustom maple-minibuffer:ignore-action
-  '(evil-ex)
+  '(evil-ex eval-expression)
   "Maple minibuffer ignore function."
   :type 'list
   :group 'maple-minibuffer)
@@ -86,34 +86,27 @@
 (defun maple-minibuffer:parameters ()
   "Maple minibuffer parameters."
   `((height . ,(or maple-minibuffer:height 10))
-    (width . ,(or maple-minibuffer:width (window-pixel-width)))
+    (width . ,(or maple-minibuffer:width 1.0))
     (left-fringe . 5)
     (right-fringe . 5)))
 
 (defmacro maple-minibuffer:with (&rest body)
   "Run BODY forms within maple-minibuffer."
   (declare (indent 0) (debug t))
-  `(let ((pframe (selected-frame)) position frame result)
-     (if (frame-parameter pframe 'maple-minibuffer)
-         (unwind-protect (setq result ,@body)
-           (select-frame-set-input-focus pframe))
-       (setq frame (or (or maple-minibuffer:frame (maple-minibuffer:create-frame pframe)))
-             position (maple-minibuffer:position pframe))
-       (set-frame-position frame (car position) (cdr position))
-       (select-frame-set-input-focus frame)
-       (unless (frame-visible-p frame)
-         (make-frame-visible frame))
-       (unwind-protect (setq result ,@body)
-         (select-frame-set-input-focus pframe)
-         (if maple-minibuffer:cache
-             (make-frame-invisible frame)
-           (delete-frame frame))))
+  `(let* ((pframe (selected-frame))
+          (frame (or maple-minibuffer:frame (maple-minibuffer:create-frame pframe)))
+          (position (maple-minibuffer:position frame))
+          result)
+     (set-frame-position frame (car position) (cdr position))
+     (select-frame-set-input-focus frame)
+     (unless (frame-visible-p frame)
+       (make-frame-visible frame))
+     (unwind-protect (setq result ,@body)
+       (select-frame-set-input-focus pframe)
+       (if maple-minibuffer:cache
+           (make-frame-invisible frame)
+         (delete-frame frame)))
      result))
-
-(defmacro maple-minibuffer:with-disable (&rest body)
-  "Run BODY with disabled maple-minibuffer-mode."
-  (declare (indent 0) (debug t))
-  `(let (maple-minibuffer-mode) ,@body))
 
 (defun maple-minibuffer:create-frame(&optional parent-frame)
   "Create maple minibuffer frame with PARENT-FRAME."
@@ -186,45 +179,24 @@
 
 (defun maple-minibuffer:read (oldfun &rest args)
   "Around minibuffer read OLDFUN with ARGS."
-  (if maple-minibuffer-mode (maple-minibuffer:with (apply oldfun args))
-    (apply oldfun args)))
-
-(defun maple-minibuffer:read-disable (oldfun &rest args)
-  "Around minibuffer read OLDFUN with ARGS."
-  (maple-minibuffer:with-disable (apply oldfun args)))
-
-;; (defmacro maple-minibuffer:ivy-read-action (action)
-;;   "Around minibuffer read ACTION."
-;;   (declare (indent 0) (debug t))
-;;   `(lambda(x) (with-selected-frame (or (frame-parent) (selected-frame)) (funcall ,action x))))
-
-;; (defun maple-minibuffer:ivy-read (oldfun &rest args)
-;;   "Around minibuffer read OLDFUN with ARGS."
-;;   (let ((action (plist-get args :action)))
-;;     (when action
-;;       (plist-put args :action (maple-minibuffer:ivy-read-action action)))
-;;     (maple-minibuffer:with (apply oldfun args))))
+  (if (or (minibufferp)
+          (memq this-command maple-minibuffer:ignore-action)
+          (frame-parameter (selected-frame) 'maple-minibuffer))
+      (apply oldfun args)
+    (maple-minibuffer:with (apply oldfun args))))
 
 (defun maple-minibuffer-mode-on()
   "Maple minibuffer mode on."
   (interactive)
   (dolist (func maple-minibuffer:action)
-    (advice-add func :around 'maple-minibuffer:read))
-  (dolist (func maple-minibuffer:ignore-action)
-    (advice-add func :around 'maple-minibuffer:read-disable)))
+    (advice-add func :around 'maple-minibuffer:read)))
 
 (defun maple-minibuffer-mode-off()
   "Maple minibuffer mode off."
   (interactive)
   (dolist (func maple-minibuffer:action)
     (advice-remove func 'maple-minibuffer:read))
-  (dolist (func maple-minibuffer:ignore-action)
-    (advice-remove func 'maple-minibuffer:read-disable))
   (setq maple-minibuffer:frame nil))
-
-;; (setq maple-minibuffer:action '(read-from-minibuffer))
-;; (setq maple-minibuffer:action '(ivy-read))
-;; (setq maple-minibuffer:action '(ivy-completing-read))
 
 ;;;###autoload
 (define-minor-mode maple-minibuffer-mode

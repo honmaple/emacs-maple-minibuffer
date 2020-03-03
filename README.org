@@ -15,9 +15,13 @@
        :hook (after-init . maple-minibuffer-mode)
        :config
        (setq maple-minibuffer:position-type 'window-bottom-left
-             maple-minibuffer:height nil
              maple-minibuffer:border-color "gray50"
-             maple-minibuffer:width 100)
+             maple-minibuffer:height nil
+             maple-minibuffer:width 0.7
+             maple-minibuffer:cache t)
+
+       (setq maple-minibuffer:action '(read-from-minibuffer read-string)
+             maple-minibuffer:ignore-action '(evil-ex eval-expression))
 
        ;; more custom parameters for frame
        (defun maple-minibuffer:parameters ()
@@ -27,4 +31,19 @@
            (left-fringe . 5)
            (right-fringe . 5))))
    #+end_src
+   
+*** *maple-minibuffer:postion-type*
+    - frame-center
+    - frame-top-center
+    - frame-top-left
+    - frame-top-right
+    - frame-bottom-left
+    - frame-bottom-right
+    - window-center
+    - window-top-center
+    - window-top-left
+    - window-top-right
+    - window-bottom-left
+    - window-bottom-right)
+    
    
