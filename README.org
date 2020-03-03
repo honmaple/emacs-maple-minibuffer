@@ -23,6 +23,8 @@
        (setq maple-minibuffer:action '(read-from-minibuffer read-string)
              maple-minibuffer:ignore-action '(evil-ex eval-expression))
 
+       (add-to-list 'maple-minibuffer:ignore-action 'org-schedule)
+
        ;; more custom parameters for frame
        (defun maple-minibuffer:parameters ()
          "Maple minibuffer parameters."

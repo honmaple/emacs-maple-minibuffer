@@ -94,7 +94,9 @@
   "Run BODY forms within maple-minibuffer."
   (declare (indent 0) (debug t))
   `(let* ((pframe (selected-frame))
-          (frame (or maple-minibuffer:frame (maple-minibuffer:create-frame pframe)))
+          (frame (if (and maple-minibuffer:frame (frame-live-p maple-minibuffer:frame))
+                     maple-minibuffer:frame
+                   (maple-minibuffer:create-frame pframe)))
           (position (maple-minibuffer:position frame))
           result)
      (set-frame-position frame (car position) (cdr position))
