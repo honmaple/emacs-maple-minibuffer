@@ -182,6 +182,7 @@
 (defun maple-minibuffer:read (oldfun &rest args)
   "Around minibuffer read OLDFUN with ARGS."
   (if (or (minibufferp)
+          (not (display-graphic-p))
           (memq this-command maple-minibuffer:ignore-action)
           (frame-parameter (selected-frame) 'maple-minibuffer))
       (apply oldfun args)
