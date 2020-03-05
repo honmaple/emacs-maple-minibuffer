@@ -76,8 +76,9 @@
   :type 'list
   :group 'maple-minibuffer)
 
-(defcustom maple-minibuffer:ignore-regexp nil
-  "Mpple minibuffer ignore regular expression."
+(defcustom maple-minibuffer:ignore-regexp
+  '("^helm-")
+  "Maple minibuffer ignore regular expression."
   :type 'list
   :group 'maple-minibuffer)
 
