@@ -24,6 +24,7 @@
              maple-minibuffer:ignore-action '(evil-ex eval-expression))
 
        (add-to-list 'maple-minibuffer:ignore-action 'org-schedule)
+       (add-to-list 'maple-minibuffer:ignore-regexp "^helm-")
 
        ;; more custom parameters for frame
        (defun maple-minibuffer:parameters ()

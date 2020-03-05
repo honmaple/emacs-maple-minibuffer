@@ -76,6 +76,11 @@
   :type 'list
   :group 'maple-minibuffer)
 
+(defcustom maple-minibuffer:ignore-regexp nil
+  "Mpple minibuffer ignore regular expression."
+  :type 'list
+  :group 'maple-minibuffer)
+
 (defcustom maple-minibuffer:cache t
   "Whether use frame cache."
   :type 'boolean
@@ -181,8 +186,13 @@
 
 (defun maple-minibuffer:read (oldfun &rest args)
   "Around minibuffer read OLDFUN with ARGS."
-  (if (or (minibufferp)
+  (if (or (not (display-graphic-p))
+          (minibufferp)
           (memq this-command maple-minibuffer:ignore-action)
+          (catch 'ignored
+            (dolist (r maple-minibuffer:ignore-regexp)
+              (when (and (stringp r) (string-match r (symbol-name this-command)))
+                (throw 'ignored t))))
           (frame-parameter (selected-frame) 'maple-minibuffer))
       (apply oldfun args)
     (maple-minibuffer:with (apply oldfun args))))
