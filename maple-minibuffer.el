@@ -146,7 +146,9 @@
   (let* ((width (with-selected-frame frame (window-pixel-width)))
          (height (with-selected-frame frame (window-pixel-height)))
          (frame-center (/ (max 0 (- (frame-pixel-width) width)) 2))
-         (window-center (+ (window-pixel-left) (/ (max 0 (- (window-pixel-width) width)) 2))))
+         (window-center (+ (window-pixel-left)
+                           (/ (max 0 (- (window-pixel-width) width)) 2)
+                           (frame-parameter (selected-frame) 'internal-border-width))))
     (pcase maple-minibuffer:position-type
       ('frame-center
        (cons frame-center
